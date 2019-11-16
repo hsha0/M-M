@@ -1,2 +1,6 @@
 # CSCI 374 Final Project: Machine and Music (M&M)
 Yuanzhe Liu, Kumo (Yiyun) Shao, Han Shao
+
+## Introduction:
+
+Nowadays, art and technology have become more intertwined than ever before. More and more artists have started to use technology to create artworks, and new tools have been invented to provide artists with more possibilities while making arts. Neural network is one of these tools. It has been used to improve people's everyday lives on multiple areas such as nature language processing, image classification, and data mining, etc. The idea of using machine learning for arts came from the combination of art and technology. Comparing with other art forms, music obtains its distinctive characteristics since it is only perceptible only by hearing and feeling. At a live concert, the music performed by artists functions as a bridge between the performers and the audience. Through this bridge, the audience receive ideas and emotions from both the composers and performers of the music. Hence, it raises a problem to us: is it possible for a machine to create some music that can rouse human emotions and passions? To figure out the answer, we came up with this project making a tool to create music spontaneously through recurrent neural networks.
