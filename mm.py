@@ -48,8 +48,10 @@ def divide_sequences(sequences):
 
     return np.array(input_feature)
 
+
 def loss_function(y_true, y_pred):
     return tf.reduce_mean(tf.reshape((y_true-y_pred)**2, shape=[-1]))
+
 
 def main():
     tf.logging.set_verbosity = True
@@ -62,10 +64,11 @@ def main():
     model.add(layers.LSTM(FLAGS.num_cells, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
     model.add(layers.Dense(FLAGS.interval*SEQUENCE_LENGTH))
     model.add(layers.Reshape((FLAGS.interval, SEQUENCE_LENGTH)))
-    model.compile(loss=loss_function, optimizer='sgd', metrics=['accuracy'])
+    model.add(layers.Softmax())
+
+    model.summary()
+    model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
     model.fit(input_feature[:-1], input_feature[1:], batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
-
-
 
 
 if __name__ == '__main__':
