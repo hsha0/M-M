@@ -28,6 +28,7 @@ class Velocity:
     def __init__(self, velocity):
         self.velocity = velocity
 
+
 def read_data(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
@@ -36,11 +37,10 @@ def read_data(data_path):
     sequences = []
     for midi_file in midi_files[:2]:
         eventSequence = convert_midi_to_eventSequence(midi_file)
-        one_hot = one_hot_enconding(eventSequence)
+        one_hot = np.array(one_hot_enconding(eventSequence))
         sequences.append(one_hot)
 
     sequences = np.array(sequences)
-    print(sequences)
 
     os.chdir(pre)
     return sequences
