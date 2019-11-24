@@ -1,5 +1,6 @@
 import tensorflow as tf
 from mm_utils import *
+from tensorflow.keras import layers
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -11,6 +12,22 @@ flags.DEFINE_string(
 
 flags.DEFINE_integer(
     "interval", 20, "The length of interval."
+)
+
+flags.DEFINE_integer(
+    "num_cells", 64, "The number of cells in one single LSTM layer."
+)
+
+flag.DEFINE_integer(
+    'num_epochs', 3, 'The epochs in the training'
+)
+
+flag.DEFINE_integer(
+    'num_training_batch_size', 32, 'The batch size in training'
+)
+
+flag.DEFINE_integer(
+    'num_eval_batch_size', 32, 'The batch size in predict (evaluation)'
 )
 
 PADDING = np.array([[0] * (128 + 128 + len(VELOCITY) + 101)])
@@ -39,6 +56,13 @@ def main():
 
     input_feature = divide_sequences(sequences)
     print(len(input_feature))
+
+    model = tf.keras.Sequential()
+    model.add(layers.LSTM(FLAGS.num_cells, input_shape=FLAGS.interval))
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    model.fit(input_feature[:-1], input_feature[:1], )
+
+
 
 
 if __name__ == '__main__':
