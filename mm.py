@@ -18,20 +18,20 @@ flags.DEFINE_integer(
     "num_cells", 64, "The number of cells in one single LSTM layer."
 )
 
-flag.DEFINE_integer(
+flags.DEFINE_integer(
     'num_epochs', 3, 'The epochs in the training'
 )
 
-flag.DEFINE_integer(
-    'num_training_batch_size', 32, 'The batch size in training'
+flags.DEFINE_integer(
+    'training_batch_size', 32, 'The batch size in training'
 )
 
-flag.DEFINE_integer(
-    'num_eval_batch_size', 32, 'The batch size in predict (evaluation)'
+flags.DEFINE_integer(
+    'eval_batch_size', 32, 'The batch size in predict (evaluation)'
 )
 
 PADDING = np.array([[0] * (128 + 128 + len(VELOCITY) + 101)])
-
+SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 
 def divide_sequences(sequences):
     input_feature = []
@@ -55,12 +55,12 @@ def main():
     sequences = read_data(data_path)
 
     input_feature = divide_sequences(sequences)
-    print(len(input_feature))
 
     model = tf.keras.Sequential()
-    model.add(layers.LSTM(FLAGS.num_cells, input_shape=FLAGS.interval))
-    model.compile(loss='sparse_categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    model.fit(input_feature[:-1], input_feature[:1], )
+    model.add(layers.LSTM(FLAGS.num_cells, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
+    
+    model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    model.fit(input_feature[:-1], input_feature[1:], batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
 
 
