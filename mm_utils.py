@@ -35,7 +35,7 @@ def read_data(data_path):
 
     midi_files = glob.glob('*.MID')
     sequences = []
-    for midi_file in midi_files[:2]:
+    for midi_file in midi_files[:1]:
         eventSequence = convert_midi_to_eventSequence(midi_file)
         one_hot = np.array(one_hot_enconding(eventSequence))
         sequences.append(one_hot)
