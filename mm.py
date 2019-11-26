@@ -11,7 +11,7 @@ flags.DEFINE_string(
 )
 
 flags.DEFINE_integer(
-    "interval", 1000, "The length of interval."
+    "interval", 20, "The length of interval."
 )
 
 flags.DEFINE_integer(
