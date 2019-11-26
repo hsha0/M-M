@@ -26,31 +26,45 @@ flags.DEFINE_integer(
     'training_batch_size', 32, 'The batch size in training'
 )
 
-flags.DEFINE_integer(
-    'eval_batch_size', 32, 'The batch size in predict (evaluation)'
-)
 
 flags.DEFINE_integer(
     'num_lstm_layers', 3, 'Number of LSTM layers.'
 )
 
-PADDING = np.array([[0] * (128 + 128 + len(VELOCITY) + 101)])
+flags.DEFINE_integer(
+    'num_generate_sequence', 10, 'Number of sequences to generate.'
+)
+
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
+PADDING = np.array([1] * SEQUENCE_LENGTH)
+
+
 
 def divide_sequences(sequences):
-    input_feature = []
+    input = []
+    output = []
 
     for sequence in sequences:
         r = len(sequence) % FLAGS.interval
+
         if r != 0:
             for i in range(20-r):
                 sequence = np.append(sequence, PADDING, axis=0)
 
-        intervals = np.split(sequence, int(len(sequence)/20))
 
-        input_feature.extend(intervals)
+        #intervals = np.array(zip(*(sequence[i:] for i in range(FLAGS.interval))))
+        intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
+        print(intervals.shape)
+        output.extend(sequence[FLAGS.interval+1:])
+        output.append(PADDING)
 
-    return np.array(input_feature)
+        input.extend(intervals)
+
+    input = np.array(input)
+    output = np.array(output)
+    print(input.shape)
+    print(output.shape)
+    return input, output
 
 
 def loss_function(y_true, y_pred):
@@ -62,21 +76,28 @@ def main():
     data_path = FLAGS.data_dir
     sequences = read_data(data_path)
 
-    input_feature = divide_sequences(sequences)
+    input, output = divide_sequences(sequences)
 
-    if FLAGS.num_lstm_layers < 1:
+    if FLAGS.num_lstm_layers < 2:
         sys.exit("Number of LSTM layers should at least be one.")
 
     model = tf.keras.Sequential()
     model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
     for i in range(FLAGS.num_lstm_layers-1):
         model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True))
-    model.add(layers.Dense(SEQUENCE_LENGTH))
+
+    model.add(layers.LSTM(SEQUENCE_LENGTH))
+    #model.add(layers.Dense(SEQUENCE_LENGTH))
     model.add(layers.Softmax())
 
     model.summary()
     model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
-    model.fit(input_feature[:-1], input_feature[1:], batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
+    model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
+
+    output = np.array([[PADDING]*20])
+    for i in range(FLAGS.num_generate_sequence):
+        output = model.predict(output, batch_size=1)
+
 
 
 if __name__ == '__main__':
