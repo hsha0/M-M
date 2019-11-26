@@ -103,10 +103,11 @@ def main():
         print(init.shape)
         print(generated_event.shape)
         init = np.append(init[1:], generated_event, axis=0)
-        generated_sequence.append(generated_event)
+        generated_sequence.append(generated_event[0])
 
     print(len(generated_sequence))
     print(len(generated_sequence[0]))
+    print(generated_event)
     sys.exit()
 
     convert_eventSequence_to_midi(generated_sequence)
