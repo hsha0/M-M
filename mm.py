@@ -49,7 +49,7 @@ def divide_sequences(sequences):
 
         r = len(sequence) % FLAGS.interval
         if r != 0:
-            for i in range(20-r):
+            for i in range(FLAGS.interval-r):
                 sequence = np.append(sequence, PADDING, axis=0)
 
         print(sequence.shape)
@@ -57,7 +57,7 @@ def divide_sequences(sequences):
         #intervals = np.array(zip(*(sequence[i:] for i in range(FLAGS.interval))))
         intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
         print(intervals.shape)
-        output.extend(sequence)
+        output.extend(sequence[FLAGS.interval+1:])
         output.append(PADDING[0])
 
         input.extend(intervals)
