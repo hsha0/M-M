@@ -103,7 +103,7 @@ def main():
         init = np.append(init[1:], generated_event, axis=0)
         generated_sequence.append(np.argmax(generated_event[0]))
 
-    print(generated_event)
+    print(generated_sequence)
     sys.exit()
 
     convert_eventSequence_to_midi(generated_sequence)
