@@ -104,7 +104,8 @@ def main():
         print(generated_event.shape)
         init = np.append(init[1:], generated_event, axis=0)
         generated_sequence.append(generated_event)
-    print(len(generated_sequence))
+
+    convert_eventSequence_to_midi(np.argmax(generated_sequence))
 
 
 
