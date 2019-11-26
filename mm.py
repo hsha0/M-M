@@ -11,7 +11,7 @@ flags.DEFINE_string(
 )
 
 flags.DEFINE_integer(
-    "interval", 20, "The length of interval."
+    "interval", 1000, "The length of interval."
 )
 
 flags.DEFINE_integer(
@@ -23,7 +23,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'training_batch_size', 32, 'The batch size in training'
+    'training_batch_size', 256, 'The batch size in training'
 )
 
 
@@ -32,7 +32,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'num_generate_events', 100, 'Number of events to generate.'
+    'num_generate_events', 1000, 'Number of events to generate.'
 )
 
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
@@ -44,8 +44,10 @@ def divide_sequences(sequences):
     output = []
 
     for sequence in sequences:
-        r = len(sequence) % FLAGS.interval
+        for i in range(FLAGS.interval):
+            sequence = np.insert(sequence, 0, PADDING, axis=0)
 
+        r = len(sequence) % FLAGS.interval
         if r != 0:
             for i in range(20-r):
                 sequence = np.append(sequence, PADDING, axis=0)
@@ -55,7 +57,7 @@ def divide_sequences(sequences):
         #intervals = np.array(zip(*(sequence[i:] for i in range(FLAGS.interval))))
         intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
         print(intervals.shape)
-        output.extend(sequence[FLAGS.interval+1:])
+        output.extend(sequence)
         output.append(PADDING[0])
 
         input.extend(intervals)
@@ -104,7 +106,6 @@ def main():
         generated_sequence.append(np.argmax(generated_event[0]))
 
     print(generated_sequence)
-    sys.exit()
 
     convert_eventSequence_to_midi(generated_sequence)
 

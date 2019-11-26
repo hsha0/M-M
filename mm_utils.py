@@ -127,5 +127,17 @@ def convert_midi_to_eventSequence(midi_file):
 def convert_eventSequence_to_midi(eventSequence):
     for event in eventSequence:
         print(event)
+        mid = mido.MidiFile()
+
+        cur_note_on = []
+        if event <= 127:
+
+
+        elif event >= 128 and event <= 255:
+
+        elif event >= 256 and event <= 256+len(VELOCITY)-1:
+
+        elif event >= 256+len(VELOCITY):
+
 
 
