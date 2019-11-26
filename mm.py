@@ -30,6 +30,10 @@ flags.DEFINE_integer(
     'eval_batch_size', 32, 'The batch size in predict (evaluation)'
 )
 
+flags.DEFINE_integer(
+    'num_lstm_layers', 3, 'Number of LSTM layers.'
+)
+
 PADDING = np.array([[0] * (128 + 128 + len(VELOCITY) + 101)])
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 
@@ -60,10 +64,14 @@ def main():
 
     input_feature = divide_sequences(sequences)
 
+    if FLAGS.num_lstm_layers < 1:
+        sys.exit("Number of LSTM layers should at least be one.")
+
     model = tf.keras.Sequential()
-    model.add(layers.LSTM(FLAGS.num_cells, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
-    model.add(layers.Dense(FLAGS.interval*SEQUENCE_LENGTH))
-    model.add(layers.Reshape((FLAGS.interval, SEQUENCE_LENGTH)))
+    model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
+    for i in range(FLAGS.num_lstm_layers-1):
+        model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True))
+    model.add(layers.Dense(SEQUENCE_LENGTH))
     model.add(layers.Softmax())
 
     model.summary()
