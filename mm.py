@@ -98,7 +98,7 @@ def main():
     print(output.shape)
     generated_sequence = []
     for i in range(FLAGS.num_generate_events):
-        output = model.predict(output, batch_size=1)
+        output = np.array([model.predict(output, batch_size=1)])
         generated_sequence.append(output)
     print(len(generated_sequence))
 
