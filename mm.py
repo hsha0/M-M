@@ -102,7 +102,7 @@ def main():
         generated_event = model.predict(init_temp, batch_size=1)
         print(init.shape)
         print(generated_event.shape)
-        init = np.append(init[1:], generated_event, axis=1)
+        init = np.append(init[1:], generated_event, axis=0)
         generated_sequence.append(generated_event)
     print(len(generated_sequence))
 
