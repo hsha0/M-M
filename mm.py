@@ -36,7 +36,7 @@ flags.DEFINE_integer(
 )
 
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
-PADDING = np.array([[1] * SEQUENCE_LENGTH])
+PADDING = np.array([[0] * SEQUENCE_LENGTH])
 
 
 def divide_sequences(sequences):
