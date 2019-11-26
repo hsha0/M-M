@@ -94,7 +94,7 @@ def main():
     model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
-    output = np.array([[PADDING*FLAGS.interval]])
+    output = np.array([[PADDING[0]*FLAGS.interval]])
     print(output.shape)
     generated_sequence = []
     for i in range(FLAGS.num_generate_events):
