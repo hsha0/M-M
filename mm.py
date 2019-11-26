@@ -32,7 +32,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'num_generate_event', 100, 'Number of events to generate.'
+    'num_generate_events', 100, 'Number of events to generate.'
 )
 
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
@@ -96,7 +96,7 @@ def main():
 
     output = np.array([[PADDING]*FLAGS.interval])
     generated_sequence = []
-    for i in range(FLAGS.num_generate_sequence):
+    for i in range(FLAGS.num_generate_events):
         output = model.predict(output, batch_size=1)
         generated_sequence.append(output)
     print(len(generated_sequence))

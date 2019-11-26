@@ -126,6 +126,8 @@ def convert_midi_to_eventSequence(midi_file):
 
 def convert_eventSequence_to_midi(eventSequence):
     for event in eventSequence:
-        index_one = event.index
+        event = list(event)
+        index_one = event.index(1)
+        print(index_one)
 
 
