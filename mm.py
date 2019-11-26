@@ -32,7 +32,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'num_generate_sequence', 10, 'Number of sequences to generate.'
+    'num_generate_event', 100, 'Number of events to generate.'
 )
 
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
@@ -56,7 +56,7 @@ def divide_sequences(sequences):
         intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
         print(intervals.shape)
         output.extend(sequence[FLAGS.interval+1:])
-        output = np.append(output, PADDING, axis=0)
+        output.append(PADDING[0])
 
         input.extend(intervals)
 
@@ -94,9 +94,15 @@ def main():
     model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
-    output = np.array([[PADDING]*20])
+    output = np.array([[PADDING]*FLAGS.interval])
+    generated_sequence = []
     for i in range(FLAGS.num_generate_sequence):
         output = model.predict(output, batch_size=1)
+        generated_sequence.append(output)
+    print(len(generated_sequence))
+
+
+
 
 
 
