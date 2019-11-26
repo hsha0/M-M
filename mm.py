@@ -100,13 +100,9 @@ def main():
     for i in range(FLAGS.num_generate_events):
         init_temp = np.array([init])
         generated_event = model.predict(init_temp, batch_size=1)
-        print(init.shape)
-        print(generated_event.shape)
         init = np.append(init[1:], generated_event, axis=0)
-        generated_sequence.append(generated_event[0])
+        generated_sequence.append(np.argmax(generated_event[0]))
 
-    print(len(generated_sequence))
-    print(len(generated_sequence[0]))
     print(generated_event)
     sys.exit()
 
