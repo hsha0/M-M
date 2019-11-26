@@ -124,6 +124,7 @@ def convert_midi_to_eventSequence(midi_file):
 
     return np.array(eventSequence)
 
+"""
 def convert_eventSequence_to_midi(eventSequence):
     for event in eventSequence:
         print(event)
@@ -138,6 +139,7 @@ def convert_eventSequence_to_midi(eventSequence):
         elif event >= 256 and event <= 256+len(VELOCITY)-1:
 
         elif event >= 256+len(VELOCITY):
+"""
 
 
 

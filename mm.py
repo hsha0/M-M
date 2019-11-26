@@ -107,7 +107,7 @@ def main():
 
     print(generated_sequence)
 
-    convert_eventSequence_to_midi(generated_sequence)
+   #convert_eventSequence_to_midi(generated_sequence)
 
 
 
