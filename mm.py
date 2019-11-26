@@ -50,12 +50,13 @@ def divide_sequences(sequences):
             for i in range(20-r):
                 sequence = np.append(sequence, PADDING, axis=0)
 
+        print(sequence.shape)
 
         #intervals = np.array(zip(*(sequence[i:] for i in range(FLAGS.interval))))
         intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
         print(intervals.shape)
         output.extend(sequence[FLAGS.interval+1:])
-        output.append(PADDING)
+        output = np.append(output, PADDING, axis=0)
 
         input.extend(intervals)
 
