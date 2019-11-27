@@ -2,6 +2,7 @@ import tensorflow as tf
 from mm_utils import *
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
+import sys
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -80,6 +81,8 @@ def loss_function(y_true, y_pred):
 def main():
     tf.logging.set_verbosity = True
     data_path = FLAGS.data_dir
+
+
     sequences = read_data(data_path)
 
     input, output = divide_sequences(sequences)

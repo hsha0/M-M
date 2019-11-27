@@ -5,12 +5,12 @@ import mido
 import sys
 
 VELOCITY = [8, 20, 31, 42, 53, 64, 80, 96, 112, 127]
+SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 
-
-def read_data(data_path):
+def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
-    midi_files = glob.glob('*.MID')[1:2]
+    midi_files = glob.glob('*.MID')[:]
     print(midi_files)
 
     sequences = []
@@ -47,6 +47,7 @@ def msg_to_event(msg):
     note_event = int(msg[0])
     velocity_event = int(msg[1])
     time_event = int(round(msg[2], 2) * 100 + 256 + len(VELOCITY))
+    if time_event >= SEQUENCE_LENGTH: time_event = SEQUENCE_LENGTH-1
 
     return [note_event, velocity_event, time_event]
 
