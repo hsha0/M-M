@@ -1,6 +1,7 @@
 import tensorflow as tf
 from mm_utils import *
 from tensorflow.keras import layers
+from tensorflow.keras import optimizers
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -23,7 +24,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'training_batch_size', 32, 'The batch size in training'
+    'training_batch_size', 256, 'The batch size in training'
 )
 
 
@@ -32,11 +33,14 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
-    'num_generate_sequence', 10, 'Number of sequences to generate.'
+    'num_generate_events', 1000, 'Number of events to generate.'
 )
 
+flags.DEFINE_float(
+    'learning_rate', 0.01, 'Learning rate.'
+)
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
-PADDING = np.array([[1] * SEQUENCE_LENGTH])
+PADDING = np.array([[0] * SEQUENCE_LENGTH])
 
 
 def divide_sequences(sequences):
@@ -44,10 +48,12 @@ def divide_sequences(sequences):
     output = []
 
     for sequence in sequences:
-        r = len(sequence) % FLAGS.interval
+        for i in range(FLAGS.interval):
+            sequence = np.insert(sequence, 0, PADDING, axis=0)
 
+        r = len(sequence) % FLAGS.interval
         if r != 0:
-            for i in range(20-r):
+            for i in range(FLAGS.interval-r):
                 sequence = np.append(sequence, PADDING, axis=0)
 
         print(sequence.shape)
@@ -56,7 +62,7 @@ def divide_sequences(sequences):
         intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
         print(intervals.shape)
         output.extend(sequence[FLAGS.interval+1:])
-        output = np.append(output, PADDING, axis=0)
+        output.append(PADDING[0])
 
         input.extend(intervals)
 
@@ -91,12 +97,25 @@ def main():
     model.add(layers.Softmax())
 
     model.summary()
-    model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
-    output = np.array([[PADDING]*20])
-    for i in range(FLAGS.num_generate_sequence):
-        output = model.predict(output, batch_size=1)
+    init = np.array(list(PADDING)*FLAGS.interval)
+    print(init.shape)
+    generated_sequence = []
+    for i in range(FLAGS.num_generate_events):
+        init_temp = np.array([init])
+        generated_event = model.predict(init_temp, batch_size=1)
+        init = np.append(init[1:], generated_event, axis=0)
+        generated_sequence.append(np.argmax(generated_event[0]))
+
+    print(generated_sequence)
+
+   #convert_eventSequence_to_midi(generated_sequence)
+
+
+
 
 
 
