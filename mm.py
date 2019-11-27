@@ -97,7 +97,7 @@ def main():
     model.add(layers.Softmax())
 
     model.summary()
-    opt = optimizers.RMSprop(lr=FLAGS.learning_rate)
+    opt = optimizers.Adam(lr=FLAGS.learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
