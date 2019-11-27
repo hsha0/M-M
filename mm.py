@@ -37,7 +37,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_float(
-    'learning_rate', 0.01, 'Learning rate.'
+    'learning_rate', 0.1, 'Learning rate.'
 )
 
 flags.DEFINE_integer(
@@ -87,9 +87,11 @@ def main():
     model.add(layers.Embedding(SEQUENCE_LENGTH, FLAGS.embedding_size, input_length=FLAGS.interval))
     model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True, input_shape=[FLAGS.interval, FLAGS.embedding_size]))
     for i in range(FLAGS.num_lstm_layers-1):
+        model.add(layers.Dropout(0.3))
         model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True))
 
-    model.add(layers.LSTM(SEQUENCE_LENGTH))
+    model.add(layers.LSTM(FLAGS.num_cells))
+    model.add(layers.Dense(SEQUENCE_LENGTH))
     model.add(layers.Softmax())
 
     model.summary()
