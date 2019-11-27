@@ -1,7 +1,7 @@
 import tensorflow as tf
 from mm_utils import *
 from tensorflow.keras import layers
-form tensorflow.keras import optimizers
+from tensorflow.keras import optimizers
 
 flags = tf.flags
 FLAGS = flags.FLAGS
