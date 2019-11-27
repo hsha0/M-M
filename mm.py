@@ -37,7 +37,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_float(
-    'learning_rate', 0.001, 'Learning rate.'
+    'learning_rate', 0.01, 'Learning rate.'
 )
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 PADDING = np.array([[0] * SEQUENCE_LENGTH])
@@ -97,7 +97,7 @@ def main():
     model.add(layers.Softmax())
 
     model.summary()
-    opt = optimizers.Adam(lr=FLAGS.learning_rate)
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
     model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
