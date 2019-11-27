@@ -40,6 +40,11 @@ flags.DEFINE_float(
     'learning_rate', 0.01, 'Learning rate.'
 )
 
+flags.DEFINE_integer(
+    'num_generate_events', 1000, 'Number of events to generate.'
+)
+
+
 
 PADDING_ID = 266
 
@@ -94,6 +99,16 @@ def main():
     model.fit(input_feature, labels, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
 
+    init = np.array([PADDING_ID]*FLAGS.interval)
+    generated_seq = []
+    for i in range(FLAGS.num_generate_events):
+        init_temp = np.array([init])
+        generated_event = np.argmax(model.predict(init_temp, batch_size=1))
+        init = np.append(init[1:], [generated_event], axis=0)
+        print(generated_event)
+        generated_seq.append(generated_event)
+
+    print(generated_seq)
 if __name__ == '__main__':
     main()
 
