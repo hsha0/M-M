@@ -1,6 +1,7 @@
 import tensorflow as tf
 from mm_utils import *
 from tensorflow.keras import layers
+form tensorflow.keras import optimizers
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -35,6 +36,9 @@ flags.DEFINE_integer(
     'num_generate_events', 1000, 'Number of events to generate.'
 )
 
+flags.DEFINE_float(
+    'learning_rate', 0.01, 'Learning rate.'
+)
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 PADDING = np.array([[0] * SEQUENCE_LENGTH])
 
@@ -93,7 +97,8 @@ def main():
     model.add(layers.Softmax())
 
     model.summary()
-    model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+    opt = optimizers.RMSprop(lr=FLAGS.learning_rate)
+    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
     init = np.array(list(PADDING)*FLAGS.interval)
