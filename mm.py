@@ -1,8 +1,8 @@
-import tensorflow as tf
 from mm_utils import *
+import tensorflow as tf
+import numpy as np
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
-import sys
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -17,7 +17,15 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_integer(
+    "embedding_size", 128, "Embedding size."
+)
+
+flags.DEFINE_integer(
     "num_cells", 64, "The number of cells in one single LSTM layer."
+)
+
+flags.DEFINE_integer(
+    'num_lstm_layers', 3, 'Number of LSTM layers.'
 )
 
 flags.DEFINE_integer(
@@ -28,98 +36,62 @@ flags.DEFINE_integer(
     'training_batch_size', 256, 'The batch size in training'
 )
 
-
-flags.DEFINE_integer(
-    'num_lstm_layers', 3, 'Number of LSTM layers.'
-)
-
-flags.DEFINE_integer(
-    'num_generate_events', 1000, 'Number of events to generate.'
-)
-
 flags.DEFINE_float(
     'learning_rate', 0.01, 'Learning rate.'
 )
-SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
-PADDING = np.array([[0] * SEQUENCE_LENGTH])
 
 
-def divide_sequences(sequences):
-    input = []
-    output = []
+PADDING_ID = 266
 
-    for sequence in sequences:
-        for i in range(FLAGS.interval):
-            sequence = np.insert(sequence, 0, PADDING, axis=0)
 
-        r = len(sequence) % FLAGS.interval
-        if r != 0:
-            for i in range(FLAGS.interval-r):
-                sequence = np.append(sequence, PADDING, axis=0)
+def devide_single_sequence(seq):
+    seq = np.concatenate((np.array([PADDING_ID]*FLAGS.interval), seq))
 
-        print(sequence.shape)
+    r = len(seq) % FLAGS.interval
+    if r != 0:
+        seq = np.concatenate((seq, np.array([PADDING_ID]*(FLAGS.interval-r))))
 
-        #intervals = np.array(zip(*(sequence[i:] for i in range(FLAGS.interval))))
-        intervals = np.array([sequence[i:i+FLAGS.interval] for i in range(len(sequence)-FLAGS.interval+1)])[:-1]
-        print(intervals.shape)
-        output.extend(sequence[FLAGS.interval+1:])
-        output.append(PADDING[0])
+    input = np.array([seq[i:i + FLAGS.interval] for i in range(len(seq) - FLAGS.interval + 1)])[:-1]
+    output = seq[FLAGS.interval:]
 
-        input.extend(intervals)
-
-    input = np.array(input)
-    output = np.array(output)
-    print(input.shape)
-    print(output.shape)
     return input, output
 
+def build_input_feature(sequences):
+    input_feature = []
+    labels = []
+    for seq in sequences:
+        input, output = devide_single_sequence(seq)
+        input_feature.extend(input)
+        labels.extend(output)
 
-def loss_function(y_true, y_pred):
-    return tf.reduce_mean(tf.reshape((y_true-y_pred)**2, shape=[-1]))
+    input_feature = np.array(input_feature)
+    labels = np.array(labels)
 
+    return input_feature, labels
 
 def main():
     tf.logging.set_verbosity = True
-    data_path = FLAGS.data_dir
 
-
-    sequences = read_data(data_path)
-
-    input, output = divide_sequences(sequences)
+    eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
+    input_feature, labels = build_input_feature(eventSequence)
 
     if FLAGS.num_lstm_layers < 2:
-        sys.exit("Number of LSTM layers should at least be one.")
+        sys.exit("Number of LSTM layers should at least be two.")
 
     model = tf.keras.Sequential()
-    model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True, input_shape=[FLAGS.interval, SEQUENCE_LENGTH]))
+    model.add(layers.Embedding(SEQUENCE_LENGTH, FLAGS.embedding_size, input_length=FLAGS.interval))
+    model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True, input_shape=[FLAGS.interval, FLAGS.embedding_size]))
     for i in range(FLAGS.num_lstm_layers-1):
         model.add(layers.LSTM(FLAGS.num_cells, return_sequences=True))
 
     model.add(layers.LSTM(SEQUENCE_LENGTH))
-    #model.add(layers.Dense(SEQUENCE_LENGTH))
     model.add(layers.Softmax())
 
     model.summary()
+
     opt = optimizers.SGD(lr=FLAGS.learning_rate)
-    model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    model.fit(input, output, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
-
-    init = np.array(list(PADDING)*FLAGS.interval)
-    print(init.shape)
-    generated_sequence = []
-    for i in range(FLAGS.num_generate_events):
-        init_temp = np.array([init])
-        generated_event = model.predict(init_temp, batch_size=1)
-        init = np.append(init[1:], generated_event, axis=0)
-        generated_sequence.append(np.argmax(generated_event[0]))
-
-    print(generated_sequence)
-
-   #convert_eventSequence_to_midi(generated_sequence)
-
-
-
-
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    model.fit(input_feature, labels, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
 
 if __name__ == '__main__':
