@@ -129,10 +129,12 @@ def main():
         init_temp = np.array([init])
         output = (model.predict(init_temp, batch_size=1))
         note, v, t = map(np.argmax, output)
+        generated_seq.append([note, v, t])
 
+        v += 256
+        t += 256+len(velocity)
         generated_event = [note, v, t]
         init = np.append(init[1:], [generated_event], axis=0)
-        print(generated_event)
         generated_seq.append(generated_event)
 
     print(generated_seq)
