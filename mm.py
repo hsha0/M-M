@@ -4,6 +4,8 @@ import numpy as np
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
 import random
+import time
+import datetime
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -14,8 +16,8 @@ flags.DEFINE_string(
 )
 
 flags.DEFINE_string(
-    "output_dir", "results",
-    "The output dir. Store output midi files."
+    "output_dir", 'results',
+    "Path to output dir."
 )
 
 flags.DEFINE_integer(
@@ -52,6 +54,14 @@ flags.DEFINE_integer(
 
 flags.DEFINE_integer(
     "epoch_interval", 10, "Epoch interval length."
+)
+
+flags.DEFINE_bool(
+    "overwritting", False, "Whether over write models"
+)
+
+flags.DEFINE_bool(
+    "sum_embeddings", True, "Whether sum the embeddings."
 )
 
 def devide_single_sequence(seq):
@@ -96,7 +106,11 @@ def create_model():
 
     embeddings =layers.Embedding(SEQUENCE_LENGTH, FLAGS.embedding_size, input_length=FLAGS.interval)(inputs)
     print(embeddings.shape)
-    reshape = layers.Reshape((FLAGS.interval, 3 * FLAGS.embedding_size))(embeddings)
+
+    if FLAGS.sum_embeddings:
+        reshape = tf.math.reduce_sum(embeddings, axis=2)
+    else:
+        reshape = layers.Reshape((FLAGS.interval, 3 * FLAGS.embedding_size))(embeddings)
     lstm = layers.LSTM(FLAGS.num_cells, return_sequences=True)(reshape)
 
     for i in range(FLAGS.num_lstm_layers-2):
@@ -112,23 +126,63 @@ def create_model():
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
     model.summary()
 
-
     return model
+
+
+def merge_init(init, init_2):
+    temp = np.insert(init_2, np.arange(len(init)), init, axis=0)
+    return temp
+
 
 def main():
 
+
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
-    input_feature, notes, velocity, time = build_input_feature(eventSequence)
+    input_feature, notes, velocity, times = build_input_feature(eventSequence)
 
     if FLAGS.num_lstm_layers < 2:
         sys.exit("Number of LSTM layers should at least be two.")
 
-    model = create_model()
-    opt = optimizers.SGD(lr=FLAGS.learning_rate)
-    loss_weights = {'notes': 0.85, 'velocity': 0.05, 'time': 0.1}
+    if not os.path.exists(FLAGS.output_dir): os.mkdir(FLAGS.output_dir)
+    os.chdir(FLAGS.output_dir)
 
-    model.compile(loss='sparse_categorical_crossentropy', loss_weights=loss_weights, optimizer=opt, metrics=['accuracy'])
+    output_folder = 'results_' + FLAGS.data_dir.split('/')[-1]
+
+    if not os.path.exists(output_folder): os.mkdir(output_folder)
+    os.chdir(output_folder)
+
+    if not os.path.exists('logs'): os.mkdir('logs')
+
+    cur_epoch = 0
+    if glob.glob('models') and not FLAGS.overwritting:
+        pre = os.getcwd()
+        os.chdir('models')
+        if glob.glob('*.ckpt'):
+            files = glob.glob('*.ckpt')
+
+            for file in files:
+                split_name = file[:-5].split('_')
+                epoch = int(split_name[-1])
+                if epoch > cur_epoch: cur_epoch = epoch
+
+            model_name = 'model_' + str(cur_epoch) + '.ckpt'
+            model = tf.keras.models.load_model(model_name)
+            print("Load model:", model_name)
+            if FLAGS.num_epochs > cur_epoch:
+                FLAGS.num_epochs = FLAGS.num_epochs - cur_epoch
+            else:
+                sys.exit("Existing model's num_epochs is larger than new one. Please delete the existing folder.")
+
+        else:
+            model = create_model()
+        os.chdir(pre)
+
+    else: model = create_model()
+
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
+
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
@@ -138,19 +192,27 @@ def main():
         epochs += FLAGS.epoch_interval
 
         model.fit(input_feature,
-                  {'notes': notes, 'velocity': velocity, 'time': time},
+                  {'notes': notes, 'velocity': velocity, 'time': times},
                   batch_size=FLAGS.training_batch_size,
                   epochs=FLAGS.epoch_interval)
 
         pre = os.getcwd()
         if not os.path.exists('models'): os.mkdir('models')
         os.chdir('models')
-        model.save('model_ckpt.' + str(epochs) + '.' + FLAGS.data_dir[-5:])
+        model.save('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
         init = np.array([[random.randrange(0, 128),
                          random.randrange(256, 256+len(VELOCITY)),
-                         random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(FLAGS.interval)])
+                         random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
+
+        note_offs = init[:,0]
+
+        init_2 = np.array([[note_offs[i]+128,
+                           random.randrange(256, 256+len(VELOCITY)),
+                           random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
+
+        init = merge_init(init, init_2)
 
         generated_seq = []
         for i in range(FLAGS.num_generate_events):
@@ -164,13 +226,8 @@ def main():
             generated_event = [note, v, t]
             init = np.append(init[1:], [generated_event], axis=0)
 
-        pre = os.getcwd()
-        if not os.path.exists(FLAGS.output_dir):
-            os.mkdir(FLAGS.output_dir)
-        os.chdir(FLAGS.output_dir)
         print(generated_seq)
-        convert_eventSequence_to_midi(generated_seq, epochs=epochs)
-        os.chdir(pre)
+        convert_eventSequence_to_midi(generated_seq, epochs=epochs+cur_epoch)
 
 
 if __name__ == '__main__':
