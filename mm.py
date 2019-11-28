@@ -148,7 +148,7 @@ def main():
         model.save('model_ckpt.' + str(epochs) + '.' + FLAGS.data_dir[-5:])
         os.chdir(pre)
 
-        init = np.array([[random.randrange(0, 256),
+        init = np.array([[random.randrange(0, 128),
                          random.randrange(256, 256+len(VELOCITY)),
                          random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(FLAGS.interval)])
 
