@@ -1,42 +1,21 @@
 import os
 import glob
-import sys
-import tensorflow as tf
-import mido
 import numpy as np
-import copy
+import mido
+import sys
 
 VELOCITY = [8, 20, 31, 42, 53, 64, 80, 96, 112, 127]
+SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 
-
-class NoteOn:
-    def __init__(self, note):
-        self.note = note
-
-
-class NoteOff:
-    def __init__(self, note):
-        self.note = note
-
-
-class TimeShift:
-    def __init__(self, time_shift):
-        self.time_shift = time_shift
-
-
-class Velocity:
-    def __init__(self, velocity):
-        self.velocity = velocity
-
-
-def read_data(data_path):
+def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
+    midi_files = glob.glob('*.MID')[:]
+    print(midi_files)
 
-    midi_files = glob.glob('*.MID')
     sequences = []
-    for midi_file in midi_files[:1]:
-        eventSequence = convert_midi_to_eventSequence(midi_file)
+    for midi in midi_files:
+        eventSequence = convert_midi_to_eventSequence(midi)
         sequences.append(eventSequence)
 
     sequences = np.array(sequences)
@@ -45,101 +24,48 @@ def read_data(data_path):
     return sequences
 
 
-def single_one_hot(event):
-
-    init_sequence = [0] * (128 + 128 + len(VELOCITY) + 101)
-    sequence = []
-    if isinstance(event, NoteOn):
-        sequence = copy.deepcopy(init_sequence)
-        sequence[int(event.note)] = 1
-    elif isinstance(event, NoteOff):
-        sequence = copy.deepcopy(init_sequence)
-        sequence[128 + int(event.note)] = 1
-    elif isinstance(event, Velocity):
-        sequence = copy.deepcopy(init_sequence)
-        sequence[128 + 128 + VELOCITY.index(event.velocity)] = 1
-    elif isinstance(event, TimeShift):
-        sequence = copy.deepcopy(init_sequence)
-        sequence[128 + 128 + len(VELOCITY) + int(float(event.time_shift) * 100)] = 1
-    else:
-        print(event)
-
-    return sequence
-
-
-def closest_velocity(true_velocity):
+def velocity_index(true_velocity):
     diff = [abs(VELOCITY[i] - int(true_velocity)) for i in range(len(VELOCITY))]
-    return VELOCITY[diff.index(min(diff))]
+    return diff.index(min(diff))
 
 
-def convert_midi_to_eventSequence(midi_file):
-    mid = mido.MidiFile(midi_file)
-    eventSequence = []
-
-    time_shift = 0
-    for msg in mid:
-
-        msg = str(msg)
-        if msg.startswith('<meta'): continue
-        if msg.startswith('sysex'): continue
-
-        msg = msg.split(' ')
-        event = msg[0]
-        info = {msg[i].split("=")[0]: msg[i].split("=")[1] for i in range(1, len(msg))}
-
-        if event == 'note_on':
-
-            if time_shift > 1: time_shift = 1.0
-            time_shift = str(round(time_shift, 2))
-
-            cloest_v = closest_velocity(info['velocity'])
-
-            note_on = NoteOn(note=info['note'])
-            velocity = Velocity(velocity=cloest_v)
-            time_shift = TimeShift(time_shift=time_shift)
-
-            note_on = single_one_hot(note_on)
-            velocity = single_one_hot(velocity)
-            time_shift = single_one_hot(time_shift)
-
-            eventSequence.extend([note_on, velocity, time_shift])
-
-            time_shift = 0
-        elif event == 'note_off':
-            note_off = NoteOff(note=info['note'])
-            if time_shift > 1: time_shift = 1.0
-            time_shift = str(round(time_shift, 2))
-            time_shift = TimeShift(time_shift=time_shift)
-            cloest_v = closest_velocity(info['velocity'])
-            velocity = Velocity(velocity=cloest_v)
-
-            note_off = single_one_hot(note_off)
-            velocity = single_one_hot(velocity)
-            time_shift = single_one_hot(time_shift)
-
-            eventSequence.extend([note_off, velocity, time_shift])
-            time_shift = 0
-        else:
-            time_shift += float(info['time'])
-
-    return np.array(eventSequence)
-
-"""
-def convert_eventSequence_to_midi(eventSequence):
-    for event in eventSequence:
-        print(event)
-        mid = mido.MidiFile()
-
-        cur_note_on = []
-        if event <= 127:
+def preprocess_msg(msg):
+    if msg.type == 'note_on':
+        return [msg.note, 256+velocity_index(msg.velocity), msg.time]
+    elif msg.type == 'note_off':
+        return [128+msg.note, 256+velocity_index(msg.velocity), msg.time]
+    else:
+        return [0, 0, msg.time]
 
 
-        elif event >= 128 and event <= 255:
-
-        elif event >= 256 and event <= 256+len(VELOCITY)-1:
-
-        elif event >= 256+len(VELOCITY):
-"""
+def add_time(msgs):
+    msgs = np.array(msgs)
+    return np.sum(msgs, axis=0)
 
 
+def msg_to_event(msg):
+    note_event = int(msg[0])
+    velocity_event = int(msg[1])
+    time_event = int(round(msg[2], 2) * 100 + 256 + len(VELOCITY))
+    if time_event >= SEQUENCE_LENGTH: time_event = SEQUENCE_LENGTH-1
+
+    return [note_event, velocity_event, time_event]
+
+
+def convert_midi_to_eventSequence(midi):
+    mid = mido.MidiFile(midi)
+
+    msgs = [msg for msg in mid if msg.type in ['note_on', 'note_off', 'control_change']]
+    processed_msgs = np.array(list(map(preprocess_msg, msgs)))
+
+    note_indices = np.nonzero(processed_msgs[:,:1])[0]
+    processed_msgs = processed_msgs[note_indices[0]:]
+    note_indices = np.nonzero(processed_msgs[:,:1])[0]+1
+
+    split_msgs = np.split(processed_msgs, note_indices)[:-1]
+    sum_msgs = np.array(list(map(add_time, split_msgs)))
+
+    eventSequence = np.apply_along_axis(msg_to_event, 1, sum_msgs).flatten()
+
+    return eventSequence
 
