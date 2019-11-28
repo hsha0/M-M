@@ -10,7 +10,7 @@ SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
-    midi_files = glob.glob('*.MID')[:]
+    midi_files = glob.glob('*.MID')[:2]
     print(midi_files)
 
     sequences = []
@@ -71,7 +71,7 @@ def convert_midi_to_eventSequence(midi):
 
 
 def single_event_to_msg(event):
-    time = int(mido.second2tick(event[2], 480, 500000))
+    time = int(mido.second2tick(event[2]+0.01, 480, 500000))
     if event[0] < 128:
         msg = mido.Message('note_on',
                      note=event[0],
@@ -95,7 +95,7 @@ def convert_eventSequence_to_midi(seq, epochs):
         else:
             break
 
-    msgs= msgs[index:]
+    msgs = msgs[index:]
     print(msgs[0])
 
     mid = mido.MidiFile()
