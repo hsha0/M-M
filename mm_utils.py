@@ -69,3 +69,39 @@ def convert_midi_to_eventSequence(midi):
 
     return eventSequence
 
+
+def single_event_to_msg(event):
+    time = int(mido.second2tick(event[2], 480, 500000))
+    if event[0] < 128:
+        msg = mido.Message('note_on',
+                     note=event[0],
+                     velocity=VELOCITY[event[1]],
+                     time=time)
+    else:
+        msg = mido.Message('note_off',
+                           note=event[0]-128,
+                           velocity=VELOCITY[event[1]],
+                           time=time)
+    return msg
+
+
+def convert_eventSequence_to_midi(seq, epochs):
+    msgs = list(map(single_event_to_msg, seq))
+
+    index = 0
+    for i in range(len(msgs)):
+        if msgs[i].type == 'note_off':
+            index = i
+        else:
+            break
+
+    msgs= msgs[index:]
+    print(msgs[0])
+
+    mid = mido.MidiFile()
+    track = mido.MidiTrack()
+    track.extend(msgs)
+
+    mid.tracks.append(track)
+
+    mid.save('new_song_epoch' +  str(epochs) + '.mid')

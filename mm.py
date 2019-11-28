@@ -13,6 +13,11 @@ flags.DEFINE_string(
     "The input data dir. Should contain the .tif files (or other data files) for the task."
 )
 
+flags.DEFINE_string(
+    "output_dir", "results",
+    "The output dir. Store output midi files."
+)
+
 flags.DEFINE_integer(
     "interval", 20, "The length of interval."
 )
@@ -43,6 +48,10 @@ flags.DEFINE_float(
 
 flags.DEFINE_integer(
     'num_generate_events', 100, 'Number of events to generate.'
+)
+
+flags.DEFINE_integer(
+    "epoch_interval", 10, "Epoch interval length."
 )
 
 def devide_single_sequence(seq):
@@ -117,33 +126,47 @@ def main():
 
     model = create_model()
     opt = optimizers.SGD(lr=FLAGS.learning_rate)
-    loss_weights = {'notes': 1, 'velocity': 0.0, 'time': 0.0}
+    loss_weights = {'notes': 0.85, 'velocity': 0.05, 'time': 0.1}
 
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    model.fit(input_feature,
-              {'notes': notes, 'velocity': velocity, 'time': time},
-              batch_size=FLAGS.training_batch_size,
-              epochs=FLAGS.num_epochs)
+    model.compile(loss='sparse_categorical_crossentropy', loss_weights=loss_weights, optimizer=opt, metrics=['accuracy'])
 
-    model.save('model_ckpt.' + FLAGS.num_epochs)
+    if FLAGS.num_epochs < FLAGS.epoch_interval:
+        FLAGS.epoch_interval = FLAGS.num_epochs
 
-    init = np.array([[random.randrange(0, 256),
-                     random.randrange(256, 256+len(VELOCITY)),
-                     random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(FLAGS.interval)])
+    epochs = 0
+    while epochs < FLAGS.num_epochs:
+        epochs += FLAGS.epoch_interval
 
-    generated_seq = []
-    for i in range(FLAGS.num_generate_events):
-        init_temp = np.array([init])
-        output = (model.predict(init_temp, batch_size=1))
-        note, v, t = map(np.argmax, output)
-        generated_seq.append([note, v, t])
+        model.fit(input_feature,
+                  {'notes': notes, 'velocity': velocity, 'time': time},
+                  batch_size=FLAGS.training_batch_size,
+                  epochs=FLAGS.epoch_interval)
 
-        v += 256
-        t += 256+len(VELOCITY)
-        generated_event = [note, v, t]
-        init = np.append(init[1:], [generated_event], axis=0)
+        model.save('model_ckpt.' + str(FLAGS.num_epochs))
 
-    print(generated_seq)
+        init = np.array([[random.randrange(0, 256),
+                         random.randrange(256, 256+len(VELOCITY)),
+                         random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(FLAGS.interval)])
+
+        generated_seq = []
+        for i in range(FLAGS.num_generate_events):
+            init_temp = np.array([init])
+            output = (model.predict(init_temp, batch_size=1))
+            note, v, t = map(np.argmax, output)
+            generated_seq.append([note, v, t])
+
+            v += 256
+            t += 256+len(VELOCITY)
+            generated_event = [note, v, t]
+            init = np.append(init[1:], [generated_event], axis=0)
+
+        pre = os.getcwd()
+        if not os.path.exists(FLAGS.output_dir):
+            os.mkdir(FLAGS.output_dir)
+        os.chdir(FLAGS.output_dir)
+        print(generated_seq)
+        convert_eventSequence_to_midi(generated_seq, epochs=epochs)
+        os.chdir(pre)
 
 
 if __name__ == '__main__':
