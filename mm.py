@@ -95,7 +95,7 @@ def create_model():
         lstm = layers.LSTM(FLAGS.num_cells, return_sequences=True)(dropout)
 
     dropout = layers.Dropout(0.2)(lstm)
-    lstm = layers.LSTM(FLAGS.num_cells, return_sequences=True)(dropout)
+    lstm = layers.LSTM(FLAGS.num_cells)(dropout)
     notes = layers.Softmax(name='notes')(layers.Dense(256)(lstm))
     velocity = layers.Softmax(name='velocity')(layers.Dense(len(VELOCITY))(lstm))
     time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
