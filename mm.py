@@ -45,17 +45,13 @@ flags.DEFINE_integer(
     'num_generate_events', 100, 'Number of events to generate.'
 )
 
-
-
-PADDING = np.array([0,0,0])
-
-
 def devide_single_sequence(seq):
-    seq = np.concatenate((np.array([PADDING]*FLAGS.interval), seq))
 
     r = len(seq) % FLAGS.interval
     if r != 0:
-        seq = np.concatenate((seq, np.array([PADDING]*(FLAGS.interval-r))))
+        seq = seq[:-r]
+
+    assert len(seq) % FLAGS.interval == 0
 
     input = np.array([seq[i:i + FLAGS.interval] for i in range(len(seq) - FLAGS.interval + 1)])[:-1]
 
@@ -120,13 +116,14 @@ def main():
 
     model = create_model()
     opt = optimizers.SGD(lr=FLAGS.learning_rate)
+    loss_weights = {'notes': 0.7, 'velocity': 0.1, 'time': 0.2}
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input_feature, {'notes': notes, 'velocity': velocity, 'time': time}, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
-    init = np.array([random.randrange(0, 256),
+    init = np.array([[random.randrange(0, 256),
                      random.randrange(256, 256+len(VELOCITY)),
-                     random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)]*FLAGS.interval)
+                     random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(FLAGS.interval)])
 
     generated_seq = []
     for i in range(FLAGS.num_generate_events):
@@ -139,7 +136,6 @@ def main():
         t += 256+len(VELOCITY)
         generated_event = [note, v, t]
         init = np.append(init[1:], [generated_event], axis=0)
-        generated_seq.append(generated_event)
 
     print(generated_seq)
 
