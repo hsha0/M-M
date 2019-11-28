@@ -3,6 +3,7 @@ import tensorflow as tf
 import numpy as np
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
+import random
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -123,7 +124,10 @@ def main():
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input_feature, {'notes': notes, 'velocity': velocity, 'time': time}, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
 
-    init = np.array([PADDING]*FLAGS.interval)
+    init = np.array([random.randrange(0, 256),
+                     random.randrange(256, 256+len(VELOCITY)),
+                     random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)]*FLAGS.interval)
+
     generated_seq = []
     for i in range(FLAGS.num_generate_events):
         init_temp = np.array([init])
