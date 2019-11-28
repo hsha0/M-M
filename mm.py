@@ -43,7 +43,7 @@ flags.DEFINE_integer(
 )
 
 flags.DEFINE_float(
-    'learning_rate', 0.1, 'Learning rate.'
+    'learning_rate', 0.01, 'Learning rate.'
 )
 
 flags.DEFINE_integer(
