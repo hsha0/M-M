@@ -95,13 +95,14 @@ def create_model():
         lstm = layers.LSTM(FLAGS.num_cells, return_sequences=True)(dropout)
 
     dropout = layers.Dropout(0.2)(lstm)
-    lstm = layers.LSTM(FLAGS.num_cells)(dropout)
+    lstm = layers.LSTM(FLAGS.num_cells, return_sequences=True)(dropout)
     notes = layers.Softmax(name='notes')(layers.Dense(256)(lstm))
     velocity = layers.Softmax(name='velocity')(layers.Dense(len(VELOCITY))(lstm))
     time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
 
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
     model.summary()
+
 
     return model
 
@@ -116,7 +117,7 @@ def main():
 
     model = create_model()
     opt = optimizers.SGD(lr=FLAGS.learning_rate)
-    loss_weights = {'notes': 0.7, 'velocity': 0.1, 'time': 0.2}
+    loss_weights = {'notes': 1, 'velocity': 0.0, 'time': 0.0}
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
     model.fit(input_feature, {'notes': notes, 'velocity': velocity, 'time': time}, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
