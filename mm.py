@@ -142,7 +142,11 @@ def main():
                   batch_size=FLAGS.training_batch_size,
                   epochs=FLAGS.epoch_interval)
 
-        model.save('model_ckpt.' + str(FLAGS.num_epochs))
+        pre = os.getcwd()
+        if not os.path.exists('models'): os.mkdir('models')
+        os.chdir('models')
+        model.save('model_ckpt.' + str(epochs) + '.' + FLAGS.data_dir[-5:])
+        os.chdir(pre)
 
         init = np.array([[random.randrange(0, 256),
                          random.randrange(256, 256+len(VELOCITY)),
