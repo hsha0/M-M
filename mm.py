@@ -132,7 +132,7 @@ def main():
         generated_seq.append([note, v, t])
 
         v += 256
-        t += 256+len(velocity)
+        t += 256+len(VELOCITY)
         generated_event = [note, v, t]
         init = np.append(init[1:], [generated_event], axis=0)
         generated_seq.append(generated_event)
