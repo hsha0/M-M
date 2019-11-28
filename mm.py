@@ -120,7 +120,12 @@ def main():
     loss_weights = {'notes': 1, 'velocity': 0.0, 'time': 0.0}
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
-    model.fit(input_feature, {'notes': notes, 'velocity': velocity, 'time': time}, batch_size=FLAGS.training_batch_size, epochs=FLAGS.num_epochs)
+    model.fit(input_feature,
+              {'notes': notes, 'velocity': velocity, 'time': time},
+              batch_size=FLAGS.training_batch_size,
+              epochs=FLAGS.num_epochs)
+
+    model.save('model_ckpt.' + FLAGS.num_epochs)
 
     init = np.array([[random.randrange(0, 256),
                      random.randrange(256, 256+len(VELOCITY)),
