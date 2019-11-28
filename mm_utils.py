@@ -10,7 +10,7 @@ SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
-    midi_files = glob.glob('*.MID')[:]
+    midi_files = glob.glob('*.MID')[:1]
     print(midi_files)
 
     sequences = []
@@ -65,7 +65,7 @@ def convert_midi_to_eventSequence(midi):
     split_msgs = np.split(processed_msgs, note_indices)[:-1]
     sum_msgs = np.array(list(map(add_time, split_msgs)))
 
-    eventSequence = np.apply_along_axis(msg_to_event, 1, sum_msgs).flatten()
+    eventSequence = np.apply_along_axis(msg_to_event, 1, sum_msgs)
 
     return eventSequence
 
