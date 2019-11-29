@@ -150,6 +150,7 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3,1))
+    init = np.cast(init, dtype=np.float64)
     print(init.dtype)
 
     decoder = decode(model,
