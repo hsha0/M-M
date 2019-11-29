@@ -4,7 +4,7 @@ from tensorflow.keras import optimizers
 from mm_utils import *
 import tensorflow as tf
 import numpy as np
-from keras_transformer import get_model
+from keras_transformer import get_model, decode
 
 flags = tf.flags
 FLAGS = flags.FLAGS
@@ -148,6 +148,19 @@ def main():
         epochs=FLAGS.num_epochs,
         batch_size=FLAGS.training_batch_size,
     )
+
+    init = test_sequence[:FLAGS.interval]
+
+    decoder = decode(model,
+                     encoder_input,
+                     start_token=None,
+                     end_token=None,
+                     pad_token=None,
+                     top_k=10,
+                     temperature=1.0)
+
+    print(decoder)
+
 
 if __name__ == '__main__':
     main()
