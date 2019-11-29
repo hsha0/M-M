@@ -71,9 +71,10 @@ def convert_midi_to_eventSequence(midi):
 
 
 def single_event_to_msg(event):
-    time = int(mido.second2tick(event[2]+0.01, 480, 500000))
+
     if event[1] > 256: event[1] -= 256
     if event[2] > 256+len(VELOCITY): event[2] -= 256+len(VELOCITY)
+    time = int(mido.second2tick(event[2] + 0.01, 480, 500000))
 
     if event[0] < 128:
         msg = mido.Message('note_on',
