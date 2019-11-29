@@ -182,7 +182,7 @@ def main():
                 if epoch > cur_epoch: cur_epoch = epoch
 
             model_name = 'model_' + str(cur_epoch) + '.ckpt'
-            model = tf.keras.Model.load_model(model_name)
+            model = tf.keras.models.load_model(model_name)
             print("Load model:", model_name)
             if FLAGS.num_epochs > cur_epoch:
                 FLAGS.num_epochs = FLAGS.num_epochs - cur_epoch
