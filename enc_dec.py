@@ -6,6 +6,10 @@ import tensorflow as tf
 import numpy as np
 from keras_transformer import get_model, decode
 
+START = SEQUENCE_LENGTH
+END = SEQUENCE_LENGTH+1
+PAD = SEQUENCE_LENGTH+2
+
 flags = tf.flags
 FLAGS = flags.FLAGS
 
@@ -67,6 +71,10 @@ def process_input_feature(input_feature):
 
     input_feature = input_feature.reshape((input_feature.shape[0], FLAGS.interval*3))
 
+    print(input_feature.shape)
+    input_feature_T = np.transpose(input_feature)
+    print(input_feature_T.shape)
+    sys.exit()
     encoder_input = input_feature[:-1]
     print(encoder_input.shape)
     decoder_input = input_feature[1:]
@@ -161,9 +169,9 @@ def main():
     init.append(SEQUENCE_LENGTH+1)
     decoded = decode(model,
                      init,
-                     start_token=init[0],
-                     end_token=266,
-                     pad_token=SEQUENCE_LENGTH+2)
+                     start_token=START,
+                     end_token=END,
+                     pad_token=PAS)
 
     print(decoded)
 
