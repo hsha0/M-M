@@ -7,6 +7,7 @@ import random
 import time
 import datetime
 
+
 flags = tf.flags
 FLAGS = flags.FLAGS
 
@@ -101,7 +102,7 @@ def build_input_feature(sequences):
     return input_feature, notes, velocity, time
 
 
-def create_model():
+def create_lstm_model():
     inputs = tf.keras.Input(shape=(FLAGS.interval,3))
 
     embeddings =layers.Embedding(SEQUENCE_LENGTH, FLAGS.embedding_size, input_length=FLAGS.interval)(inputs)
@@ -127,7 +128,6 @@ def create_model():
     model.summary()
 
     return model
-
 
 def merge_init(init, init_2):
     temp = np.insert(init_2, np.arange(len(init)), init, axis=0)
@@ -178,12 +178,12 @@ def main():
                 sys.exit("Existing model's num_epochs is larger than new one. Please delete the existing folder.")
 
         else:
-            model = create_model()
+            model = create_lstm_model()
         os.chdir(pre)
 
-    else: model = create_model()
+    else: model = create_lstm_model()
 
-    opt = optimizers.SGD(lr=FLAGS.learning_rate)
+    opt = optimizers.SGD(lr=FLAGS.learning_rate, momentum=1)
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
