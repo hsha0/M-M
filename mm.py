@@ -155,7 +155,7 @@ def main():
     if not os.path.exists(output_folder): os.mkdir(output_folder)
     os.chdir(output_folder)
 
-    model = create_lstm_model()
+
 
     cur_epoch = 0
     if glob.glob('models') and not FLAGS.overwritting:
@@ -170,14 +170,18 @@ def main():
                 if epoch > cur_epoch: cur_epoch = epoch
 
             model_name = 'model_' + str(cur_epoch) + '.ckpt'
-            model.load_weights(model_name)
+            model = tf.keras.Model.load_model(model_name)
             print("Load model:", model_name)
             if FLAGS.num_epochs > cur_epoch:
                 FLAGS.num_epochs = FLAGS.num_epochs - cur_epoch
             else:
                 sys.exit("Existing model's num_epochs is larger than new one. Please delete the existing folder.")
+        else:
+            model = create_lstm_model()
 
         os.chdir(pre)
+    else:
+        model = create_lstm_model()
 
     opt = optimizers.SGD(lr=FLAGS.learning_rate)
 
