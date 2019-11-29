@@ -196,10 +196,10 @@ def main():
         model = create_lstm_model()
 
     if FLAGS.use_tpu:
-        model = tf.contrib.tpu.keras_to_tpu_model(
-            model,
-            strategy=tf.contrib.tpu.TPUDistributionStrategy(
-                tf.contrib.cluster_resolver.TPUClusterResolver(FLAGS.tpu_address)))
+        strategy = tf.distribute.experimental.TPUStrategy(
+            tf.contrib.cluster_resolver.TPUClusterResolver(FLAGS.tpu_address))
+        with strategy.scope():
+            model = tf.keras.models.load_model(model_name)
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
