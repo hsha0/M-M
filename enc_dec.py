@@ -154,7 +154,7 @@ def main():
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
     print(init.shape)
 
-    init = list(init.astype(dtype=np.float64).flatten())
+    init = list(init.flatten())
     print(init)
     init.insert(0, SEQUENCE_LENGTH)
     init.append(SEQUENCE_LENGTH+1)
