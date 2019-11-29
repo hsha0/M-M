@@ -156,7 +156,7 @@ def main():
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
         print(init)
-        result = model.predict(x=[init, np.array([[-1]*(FLAGS*3)])], batch_size=1)
+        result = model.predict(x=[init, np.array([[-1]*(FLAGS.interval*3)])], batch_size=1)
         seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
         print(seq)
