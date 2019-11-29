@@ -74,8 +74,9 @@ def single_event_to_msg(event):
 
     if event[1] > 256: event[1] -= 256
     if event[2] > 256+len(VELOCITY): event[2] -= 256+len(VELOCITY)
+    print(event[2])
     time = int(mido.second2tick(event[2] + 0.01, 480, 500000))
-
+    print(time)
     if event[0] < 128:
         msg = mido.Message('note_on',
                            note=event[0],
