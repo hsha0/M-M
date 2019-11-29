@@ -158,7 +158,7 @@ def main():
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
         result = model.predict(x=[init, init], batch_size=1)
         print(result.shape)
-        seq = np.reshape(np.argmax(result, axis=2)[0], (FLAGS.interval, 3))
+        seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
         print(result)
         init = np.argmax(result, axis=2).flatten()
