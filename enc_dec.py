@@ -152,12 +152,11 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
-    init = np.array([init.astype(dtype=np.float64)])
-    print(init.dtype)
 
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
         result = model.predict(x=[init, init], batch_size=1)
+        init = result
         print(result.shape)
         seq = np.reshape(np.argmax(result, axis=2)[0],(FLAGS.interval, 3))
         generated_seq.extend(seq)
