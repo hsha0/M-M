@@ -153,15 +153,8 @@ def main():
     init = init.astype(dtype=np.float64)
     print(init.dtype)
 
-    decoder = decode(model,
-                     init,
-                     start_token=SEQUENCE_LENGTH,
-                     end_token=-SEQUENCE_LENGTH+1,
-                     pad_token=SEQUENCE_LENGTH+2,
-                     top_k=10,
-                     temperature=1)
-
-    print(decoder)
+    result = model.predict(x=[init, init], batch_size=1)
+    print(result)
 
 
 if __name__ == '__main__':
