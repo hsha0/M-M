@@ -149,10 +149,10 @@ def main():
         batch_size=FLAGS.training_batch_size,
     )
 
-    init = test_sequence[:FLAGS.interval]
+    init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3,1))
 
     decoder = decode(model,
-                     encoder_input,
+                     init,
                      start_token=None,
                      end_token=None,
                      pad_token=None,
