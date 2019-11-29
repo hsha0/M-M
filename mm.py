@@ -195,8 +195,6 @@ def main():
     else:
         model = create_lstm_model()
 
-
-
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
 
@@ -212,7 +210,7 @@ def main():
         pre = os.getcwd()
         if not os.path.exists('models'): os.mkdir('models')
         os.chdir('models')
-        model.save_weights('model_' + str(epochs+cur_epoch) + '.ckpt')
+        model.save_model('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
         """
@@ -228,8 +226,6 @@ def main():
 
         init = merge_init(init, init_2)
         """
-        model = create_lstm_model()
-        model.load_weights(model_name)
         init = test_sequence[:FLAGS.interval]
 
         generated_seq = []
