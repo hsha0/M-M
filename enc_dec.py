@@ -149,7 +149,7 @@ def main():
         batch_size=FLAGS.training_batch_size,
     )
 
-    init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3,1))
+    init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
     init = init.astype(dtype=np.float64)
     print(init.dtype)
 
