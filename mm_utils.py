@@ -10,7 +10,7 @@ SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
-    midi_files = glob.glob('*.MID')[:2]
+    midi_files = glob.glob('*.MID')[:]
     print(midi_files)
 
     sequences = []
