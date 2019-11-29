@@ -68,6 +68,8 @@ def process_input_feature(input_feature):
     input_feature = input_feature.reshape((input_feature.shape[0], FLAGS.interval*3))
 
     encoder_input = input_feature[:-1]
+    print(encoder_input.shape)
+    sys.exit()
     decoder_input = input_feature[1:]
 
     return encoder_input, decoder_input
@@ -92,6 +94,7 @@ def create_transformer():
     )
 
     return model
+
 
 def devide_single_sequence(seq):
 
@@ -150,7 +153,7 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
-    init = init.astype(dtype=np.float64)
+    init = np.array([init.astype(dtype=np.float64)])
     print(init.dtype)
 
     result = model.predict(x=[init, init], batch_size=1)
