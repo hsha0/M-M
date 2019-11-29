@@ -65,6 +65,14 @@ flags.DEFINE_bool(
     "sum_embeddings", True, "Whether sum the embeddings."
 )
 
+flags.DEFINE_bool(
+    "use_tpu", False, "Whether use tpu."
+)
+
+flags.DEFINE_string(
+    "tpu_address", None, "TPU address."
+)
+
 def devide_single_sequence(seq):
 
     r = len(seq) % FLAGS.interval
@@ -125,6 +133,10 @@ def create_lstm_model():
     time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
 
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
+
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+
     model.summary()
 
     return model
@@ -183,9 +195,11 @@ def main():
     else:
         model = create_lstm_model()
 
-    opt = optimizers.SGD(lr=FLAGS.learning_rate)
-
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    if FLAGS.use_tpu:
+        model = tf.contrib.tpu.keras_to_tpu_model(
+            model,
+            strategy=tf.contrib.tpu.TPUDistributionStrategy(
+                tf.contrib.cluster_resolver.TPUClusterResolver(FLAGS.tpu_address)))
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
@@ -202,7 +216,7 @@ def main():
         pre = os.getcwd()
         if not os.path.exists('models'): os.mkdir('models')
         os.chdir('models')
-        model.save('model_' + str(epochs+cur_epoch) + '.ckpt')
+        model.save_weights('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
         """
@@ -218,6 +232,8 @@ def main():
 
         init = merge_init(init, init_2)
         """
+        model = create_lstm_model()
+        model.load_weights(model_name)
         init = test_sequence[:FLAGS.interval]
 
         generated_seq = []
