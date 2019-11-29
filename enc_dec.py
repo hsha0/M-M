@@ -172,7 +172,8 @@ def main():
                      init,
                      start_token=START,
                      end_token=END,
-                     pad_token=PAD)
+                     pad_token=PAD,
+                     max_len=SEQUENCE_LENGTH)
 
     print(decoded)
 
