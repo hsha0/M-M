@@ -150,6 +150,7 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3,1))
+    print(init.dtype)
 
     decoder = decode(model,
                      init,
@@ -157,7 +158,7 @@ def main():
                      end_token=-SEQUENCE_LENGTH+1,
                      pad_token=SEQUENCE_LENGTH+2,
                      top_k=10,
-                     temperature=1.0)
+                     temperature=1)
 
     print(decoder)
 
