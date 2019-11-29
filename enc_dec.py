@@ -71,11 +71,9 @@ def process_input_feature(input_feature):
 
     input_feature = input_feature.reshape((input_feature.shape[0], FLAGS.interval*3))
 
-    print(input_feature.shape)
     input_feature = np.insert(input_feature, 0, np.array([START]*input_feature.shape[0]), axis=1)
     input_feature = np.insert(input_feature, input_feature.shape[1], np.array([END]*input_feature.shape[0]),axis=1)
-    print(input_feature.shape)
-    sys.exit()
+
     encoder_input = input_feature[:-1]
     print(encoder_input.shape)
     decoder_input = input_feature[1:]
@@ -166,13 +164,13 @@ def main():
     #init = list(init.astype(dtype=np.float64).flatten())
     init = list(init)
     print(init)
-    init.insert(0, SEQUENCE_LENGTH)
-    init.append(SEQUENCE_LENGTH+1)
+    init.insert(0, START)
+    init.append(END)
     decoded = decode(model,
                      init,
                      start_token=START,
                      end_token=END,
-                     pad_token=PAS)
+                     pad_token=PAD)
 
     print(decoded)
 
