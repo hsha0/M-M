@@ -150,12 +150,10 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3,1))
+    init = np.cast(init, dtype=np.int64)
 
     decoder = decode(model,
                      init,
-                     start_token=None,
-                     end_token=None,
-                     pad_token=None,
                      top_k=10,
                      temperature=1.0)
 
