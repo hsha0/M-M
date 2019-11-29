@@ -155,7 +155,7 @@ def main():
     print(init.shape)
 
     init = list(init.astype(dtype=np.float64).flatten())
-    init.insert(index=0, object=SEQUENCE_LENGTH)
+    init.insert(0, SEQUENCE_LENGTH)
     init.append(SEQUENCE_LENGTH+1)
     decoded = decode(model,
                      init,
