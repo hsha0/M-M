@@ -157,7 +157,12 @@ def main():
 
     result = model.predict(x=[init, init], batch_size=1)
     print(result.shape)
-    print(np.argmax(result, axis=2))
+    generated_seq = np.reshape(np.argmax(result, axis=2)[0],(FLAGS.interval, 3))
+    print(generated_seq)
+
+
+
+
 
 
 if __name__ == '__main__':
