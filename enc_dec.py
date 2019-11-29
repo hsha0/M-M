@@ -72,7 +72,7 @@ def process_input_feature(input_feature):
     input_feature = input_feature.reshape((input_feature.shape[0], FLAGS.interval*3))
 
     print(input_feature.shape)
-    input_feature = np.insert(input_feature, np.array([START]*input_feature.shape[0]),axis=1)
+    input_feature = np.insert(input_feature, 0, np.array([START]*input_feature.shape[0]), axis=1)
     print(input_feature.shape)
     sys.exit()
     encoder_input = input_feature[:-1]
