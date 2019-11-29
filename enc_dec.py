@@ -101,7 +101,7 @@ def create_transformer():
     model.compile(
         optimizer=opt,
         loss='sparse_categorical_crossentropy',
-        metrics='acc'
+        metrics=['acc']
     )
 
     return model
