@@ -136,7 +136,6 @@ def merge_init(init, init_2):
 
 def main():
 
-
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
 
