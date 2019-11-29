@@ -161,11 +161,9 @@ def main():
     init.append(SEQUENCE_LENGTH+1)
     decoded = decode(model,
                      init,
-                     start_token=SEQUENCE_LENGTH,
-                     end_token=SEQUENCE_LENGTH+1,
-                     pad_token=SEQUENCE_LENGTH+2,
-                     top_k=10,
-                     temperature=1.0)
+                     start_token=init[0],
+                     end_token=266,
+                     pad_token=SEQUENCE_LENGTH+2)
 
     print(decoded)
 
