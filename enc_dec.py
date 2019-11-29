@@ -154,12 +154,9 @@ def main():
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
 
     fake_decode = np.zeros(init.shape)
-    print(init.shape)
-    print(fake_decode.shape)
-    sys.exit()
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
-        result = model.predict(x=[init, np.array([[-1]*(FLAGS.interval*3)])], batch_size=1)
+        result = model.predict(x=[init, fake_decode], batch_size=1)
         seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
         print(seq)
