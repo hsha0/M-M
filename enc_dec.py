@@ -145,7 +145,7 @@ def main():
     model.fit(
         x=[encoder_input, decoder_input],
         y=np.reshape(decoder_input,(decoder_input.shape[0], decoder_input.shape[1], 1)),
-        epochs=1,
+        epochs=FLAGS.num_epochs,
         batch_size=FLAGS.training_batch_size,
     )
 
