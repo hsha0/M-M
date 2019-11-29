@@ -69,7 +69,6 @@ def process_input_feature(input_feature):
 
     encoder_input = input_feature[:-1]
     print(encoder_input.shape)
-    sys.exit()
     decoder_input = input_feature[1:]
 
     return encoder_input, decoder_input
@@ -157,6 +156,7 @@ def main():
     print(init.dtype)
 
     result = model.predict(x=[init, init], batch_size=1)
+    print(result.shape)
     print(np.argmax(result, axis=0))
 
 
