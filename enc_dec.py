@@ -154,7 +154,7 @@ def main():
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
     print(init.shape)
 
-    init = init.astype(dtype=np.float64)
+    init = init.astype(dtype=np.float64).flatten()
     decoded = decode(model,
                      init,
                      start_token=SEQUENCE_LENGTH,
