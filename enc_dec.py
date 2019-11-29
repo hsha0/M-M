@@ -154,6 +154,17 @@ def main():
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
     print(init.shape)
 
+    decoded = decode(model,
+                     init,
+                     start_token=SEQUENCE_LENGTH,
+                     end_token=SEQUENCE_LENGTH+1,
+                     pad_token=SEQUENCE_LENGTH+2,
+                     top_k=10,
+                     temperature=1.0)
+
+    print(decoded)
+
+    """
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
         print(init)
@@ -170,6 +181,7 @@ def main():
     convert_eventSequence_to_midi(generated_seq, FLAGS.num_epochs)
     os.chdir(pre)
 
+    """
 
 
 

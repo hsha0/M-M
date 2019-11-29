@@ -156,7 +156,6 @@ def main():
     if not os.path.exists(output_folder): os.mkdir(output_folder)
     os.chdir(output_folder)
 
-
     cur_epoch = 0
     if glob.glob('models') and not FLAGS.overwritting:
         pre = os.getcwd()
