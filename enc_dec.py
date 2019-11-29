@@ -5,6 +5,7 @@ from mm_utils import *
 import tensorflow as tf
 import numpy as np
 from keras_transformer import get_model, decode
+import keras
 
 START = SEQUENCE_LENGTH
 END = SEQUENCE_LENGTH+1
@@ -96,8 +97,7 @@ def create_transformer():
                       embed_weights=np.random.random((SEQUENCE_LENGTH, FLAGS.embedding_size))
                       )
 
-    opt = tf.keras.optimizers.Adam(lr=FLAGS.learning_rate)
-
+    opt = keras.optimizers.Adam(lr=FLAGS.learning_rate)
     model.compile(
         optimizer=opt,
         loss='sparse_categorical_crossentropy',
