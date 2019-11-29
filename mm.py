@@ -210,7 +210,7 @@ def main():
         pre = os.getcwd()
         if not os.path.exists('models'): os.mkdir('models')
         os.chdir('models')
-        model.save_model('model_' + str(epochs+cur_epoch) + '.ckpt')
+        model.save('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
         """
