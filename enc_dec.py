@@ -156,18 +156,13 @@ def main():
 
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
+        print(init)
         result = model.predict(x=[init, init], batch_size=1)
-        print(result.shape)
         seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
-        print(result)
         init = np.argmax(result, axis=2).flatten()
-        print(init.shape)
-
-
 
         generated_seq.extend(seq)
-    print(generated_seq)
 
     pre = os.getcwd()
     os.chdir(FLAGS.output_dir)
