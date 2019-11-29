@@ -179,7 +179,7 @@ def main():
 
         os.chdir(pre)
 
-    opt = optimizers.SGD(lr=FLAGS.learning_rate, momentum=1)
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
 
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
