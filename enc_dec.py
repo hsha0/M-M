@@ -73,6 +73,7 @@ def process_input_feature(input_feature):
 
     print(input_feature.shape)
     input_feature = np.insert(input_feature, 0, np.array([START]*input_feature.shape[0]), axis=1)
+    input_feature = np.insert(input_feature, input_feature.shape[1], np.array([END]*input_feature.shape[0]),axis=1)
     print(input_feature.shape)
     sys.exit()
     encoder_input = input_feature[:-1]
