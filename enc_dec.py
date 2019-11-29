@@ -176,7 +176,9 @@ def main():
                      start_token=START,
                      end_token=END,
                      pad_token=PAD,
-                     max_len=FLAGS.interval*3)
+                     max_len=FLAGS.interval*3,
+                     top_k=10,
+                     temperature=1.0)
 
     print(decoded)
 
