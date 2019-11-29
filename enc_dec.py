@@ -154,7 +154,7 @@ def main():
     print(init.dtype)
 
     result = model.predict(x=[init, init], batch_size=1)
-    print(result)
+    print(np.argmax(result))
 
 
 if __name__ == '__main__':
