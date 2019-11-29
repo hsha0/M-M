@@ -160,6 +160,7 @@ def main():
         result = model.predict(x=[init, init], batch_size=1)
         seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
+        print(seq)
         init = np.argmax(result, axis=2).flatten()
 
         generated_seq.extend(seq)
