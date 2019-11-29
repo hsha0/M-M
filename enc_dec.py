@@ -96,9 +96,12 @@ def create_transformer():
                       embed_weights=np.random.random((SEQUENCE_LENGTH, FLAGS.embedding_size))
                       )
 
+    opt = tf.keras.optimizers.Adam(lr=FLAGS.learning_rate)
+
     model.compile(
-        optimizer='adam',
+        optimizer=opt,
         loss='sparse_categorical_crossentropy',
+        metrics='acc'
     )
 
     return model
@@ -173,7 +176,7 @@ def main():
                      start_token=START,
                      end_token=END,
                      pad_token=PAD,
-                     max_len=SEQUENCE_LENGTH)
+                     max_len=FLAGS.interval*3)
 
     print(decoded)
 
