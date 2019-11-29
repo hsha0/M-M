@@ -160,6 +160,11 @@ def main():
     generated_seq = np.reshape(np.argmax(result, axis=2)[0],(FLAGS.interval, 3))
     print(generated_seq)
 
+    pre = os.getcwd()
+    os.chdir(FLAGS.output_dir)
+    convert_eventSequence_to_midi(generated_seq, FLAGS.num_epochs)
+    os.chdir(pre)
+
 
 
 
