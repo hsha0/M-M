@@ -152,11 +152,28 @@ def main():
     )
 
     init = np.reshape(test_sequence[:FLAGS.interval], (FLAGS.interval*3))
+    print(init.shape)
 
-    fake_decode = np.zeros(init.shape)
+    #init = list(init.astype(dtype=np.float64).flatten())
+    init = list(init)
+    print(init)
+    init.insert(0, SEQUENCE_LENGTH)
+    init.append(SEQUENCE_LENGTH+1)
+    decoded = decode(model,
+                     init,
+                     start_token=SEQUENCE_LENGTH,
+                     end_token=SEQUENCE_LENGTH+1,
+                     pad_token=SEQUENCE_LENGTH+2,
+                     top_k=10,
+                     temperature=1.0)
+
+    print(decoded)
+
+    """
     generated_seq = []
     for i in range(int(FLAGS.num_generate_events/FLAGS.interval)):
-        result = model.predict(x=[init, fake_decode], batch_size=1)
+        print(init)
+        result = model.predict(x=[init, init], batch_size=1)
         seq = np.reshape(np.argmax(result, axis=2), (FLAGS.interval, 3))
 
         print(seq)
@@ -168,6 +185,9 @@ def main():
     os.chdir(FLAGS.output_dir)
     convert_eventSequence_to_midi(generated_seq, FLAGS.num_epochs)
     os.chdir(pre)
+
+    """
+
 
 
 
