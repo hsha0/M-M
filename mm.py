@@ -151,9 +151,10 @@ def main():
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
 
-    #test_sequence = eventSequence[-1]
+    random_index = random.randrange(len(eventSequence))
+    test_sequence = eventSequence[random_index]
 
-    eventSequence = eventSequence[:]
+    eventSequence = np.concatenate((eventSequence[:random_index], eventSequence[random_index+1:]), axis=0)
     input_feature, notes, velocity, times = build_input_feature(eventSequence)
 
     if FLAGS.num_lstm_layers < 2:
