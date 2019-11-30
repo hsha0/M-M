@@ -152,7 +152,7 @@ def main():
     test_sequence = eventSequence[random_index]
 
     eventSequence = np.delete(eventSequence, random_index, axis=0)
-    eventSequence = np.random.shuffle(eventSequence)
+    np.random.shuffle(eventSequence)
     input_feature, notes, velocity, times = build_input_feature(eventSequence)
 
 
