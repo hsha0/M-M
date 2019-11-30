@@ -103,10 +103,13 @@ def convert_eventSequence_to_midi(seq, epochs):
     msgs = msgs[index:]
     print(msgs[0])
 
+    msg = mido.Message('control_change', control=64, value=64)
+    msgs.insert(0, msg)
+
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     track.extend(msgs)
 
     mid.tracks.append(track)
 
-    mid.save('new_song_epoch' +  str(epochs) + '.mid')
+    mid.save('new_song_epoch' + str(epochs) + '.mid')
