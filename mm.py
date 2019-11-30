@@ -157,8 +157,6 @@ def main():
     eventSequence = np.delete(eventSequence, random_index, axis=0)
     input_feature, notes, velocity, times = build_input_feature(eventSequence)
 
-    print('finish')
-    sys.exit()
 
     if FLAGS.num_lstm_layers < 2:
         sys.exit("Number of LSTM layers should at least be two.")
