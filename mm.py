@@ -212,6 +212,7 @@ def main():
         model.save('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
+        """
         init = np.array([[random.randrange(0, 128),
                          random.randrange(256, 256+len(VELOCITY)),
                          random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
@@ -223,8 +224,9 @@ def main():
                            random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
 
         init = merge_init(init, init_2)
+        """
 
-        #init = test_sequence[:FLAGS.interval]
+        init = test_sequence[:FLAGS.interval]
 
         generated_seq = []
         for i in range(FLAGS.num_generate_events):
