@@ -133,9 +133,6 @@ def create_lstm_model():
     time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
 
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
-    opt = optimizers.SGD(lr=FLAGS.learning_rate, decay=1e-6)
-
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     model.summary()
 
@@ -194,6 +191,9 @@ def main():
         os.chdir(pre)
     else:
         model = create_lstm_model()
+
+    opt = optimizers.SGD(lr=FLAGS.learning_rate, decay=1e-6)
+    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
