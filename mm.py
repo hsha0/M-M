@@ -151,9 +151,9 @@ def main():
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
 
-    test_sequence = eventSequence[-1]
+    #test_sequence = eventSequence[-1]
 
-    eventSequence = eventSequence[:-1]
+    eventSequence = eventSequence[:]
     input_feature, notes, velocity, times = build_input_feature(eventSequence)
 
     if FLAGS.num_lstm_layers < 2:
@@ -166,8 +166,6 @@ def main():
 
     if not os.path.exists(output_folder): os.mkdir(output_folder)
     os.chdir(output_folder)
-
-
 
     cur_epoch = 0
     if glob.glob('models') and not FLAGS.overwritting:
@@ -213,7 +211,6 @@ def main():
         model.save('model_' + str(epochs+cur_epoch) + '.ckpt')
         os.chdir(pre)
 
-        """
         init = np.array([[random.randrange(0, 128),
                          random.randrange(256, 256+len(VELOCITY)),
                          random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
@@ -225,8 +222,8 @@ def main():
                            random.randrange(256+len(VELOCITY), SEQUENCE_LENGTH)] for i in range(int(FLAGS.interval/2))])
 
         init = merge_init(init, init_2)
-        """
-        init = test_sequence[:FLAGS.interval]
+
+        #init = test_sequence[:FLAGS.interval]
 
         generated_seq = []
         for i in range(FLAGS.num_generate_events):
