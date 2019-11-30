@@ -151,6 +151,7 @@ def main():
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
 
+    sys.exit()
     random_index = random.randrange(len(eventSequence))
     test_sequence = eventSequence[random_index]
 
