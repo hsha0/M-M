@@ -10,7 +10,7 @@ SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
-    midi_files = glob.glob('*.MID')[:2]
+    midi_files = glob.glob('*.MID')[:]
     print(midi_files)
 
     sequences = []
@@ -71,12 +71,17 @@ def convert_midi_to_eventSequence(midi):
 
 
 def single_event_to_msg(event):
-    time = int(mido.second2tick(event[2]+0.01, 480, 500000))
+
+    if event[1] >= 256: event[1] -= 256
+
+    if event[2] >= 256+len(VELOCITY): event[2] -= 256+len(VELOCITY)
+    time = int(mido.second2tick(event[2]/100 + 0.01, 480, 500000))
     if event[0] < 128:
         msg = mido.Message('note_on',
-                     note=event[0],
-                     velocity=VELOCITY[event[1]],
-                     time=time)
+                           note=event[0],
+                           velocity=VELOCITY[event[1]],
+                           time=time)
+
     else:
         msg = mido.Message('note_off',
                            note=event[0]-128,
@@ -98,10 +103,13 @@ def convert_eventSequence_to_midi(seq, epochs):
     msgs = msgs[index:]
     print(msgs[0])
 
+    msg = mido.Message('control_change', control=64, value=64)
+    msgs.insert(0, msg)
+
     mid = mido.MidiFile()
     track = mido.MidiTrack()
     track.extend(msgs)
 
     mid.tracks.append(track)
 
-    mid.save('new_song_epoch' +  str(epochs) + '.mid')
+    mid.save('new_song_epoch' + str(epochs) + '.mid')

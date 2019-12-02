@@ -7,6 +7,7 @@ import random
 import time
 import datetime
 
+
 flags = tf.flags
 FLAGS = flags.FLAGS
 
@@ -61,7 +62,15 @@ flags.DEFINE_bool(
 )
 
 flags.DEFINE_bool(
-    "sum_embeddings", True, "Whether sum the embeddings."
+    "sum_embeddings", False, "Whether sum the embeddings."
+)
+
+flags.DEFINE_bool(
+    "use_tpu", False, "Whether use tpu."
+)
+
+flags.DEFINE_string(
+    "tpu_address", None, "TPU address."
 )
 
 def devide_single_sequence(seq):
@@ -101,7 +110,7 @@ def build_input_feature(sequences):
     return input_feature, notes, velocity, time
 
 
-def create_model():
+def create_lstm_model():
     inputs = tf.keras.Input(shape=(FLAGS.interval,3))
 
     embeddings =layers.Embedding(SEQUENCE_LENGTH, FLAGS.embedding_size, input_length=FLAGS.interval)(inputs)
@@ -124,10 +133,10 @@ def create_model():
     time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
 
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
+
     model.summary()
 
     return model
-
 
 def merge_init(init, init_2):
     temp = np.insert(init_2, np.arange(len(init)), init, axis=0)
@@ -136,14 +145,16 @@ def merge_init(init, init_2):
 
 def main():
 
-
     tf.logging.set_verbosity = True
     eventSequence = convert_files_to_eventSequence(FLAGS.data_dir)
 
-    test_sequence = eventSequence[-1]
+    random_index = random.randrange(len(eventSequence))
+    test_sequence = eventSequence[random_index]
 
-    eventSequence = eventSequence[:-1]
+    eventSequence = np.delete(eventSequence, random_index, axis=0)
+    np.random.shuffle(eventSequence)
     input_feature, notes, velocity, times = build_input_feature(eventSequence)
+
 
     if FLAGS.num_lstm_layers < 2:
         sys.exit("Number of LSTM layers should at least be two.")
@@ -155,7 +166,6 @@ def main():
 
     if not os.path.exists(output_folder): os.mkdir(output_folder)
     os.chdir(output_folder)
-
 
     cur_epoch = 0
     if glob.glob('models') and not FLAGS.overwritting:
@@ -176,15 +186,14 @@ def main():
                 FLAGS.num_epochs = FLAGS.num_epochs - cur_epoch
             else:
                 sys.exit("Existing model's num_epochs is larger than new one. Please delete the existing folder.")
-
         else:
-            model = create_model()
+            model = create_lstm_model()
+
         os.chdir(pre)
+    else:
+        model = create_lstm_model()
 
-    else: model = create_model()
-
-    opt = optimizers.SGD(lr=FLAGS.learning_rate)
-
+    opt = optimizers.SGD(lr=FLAGS.learning_rate, decay=1e-6)
     model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
@@ -218,6 +227,7 @@ def main():
 
         init = merge_init(init, init_2)
         """
+
         init = test_sequence[:FLAGS.interval]
 
         generated_seq = []
