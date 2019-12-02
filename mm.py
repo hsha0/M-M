@@ -62,7 +62,7 @@ flags.DEFINE_bool(
 )
 
 flags.DEFINE_bool(
-    "sum_embeddings", True, "Whether sum the embeddings."
+    "sum_embeddings", False, "Whether sum the embeddings."
 )
 
 flags.DEFINE_bool(
