@@ -11,6 +11,8 @@ def convert_files_to_eventSequence(data_path):
     pre = os.getcwd()
     os.chdir(data_path)
     midi_files = glob.glob('*.MID')[:]
+    midi_files.extend(glob.glob('*.mid'))
+
     print(midi_files)
 
     sequences = []
