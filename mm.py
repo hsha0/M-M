@@ -128,9 +128,10 @@ def create_lstm_model():
 
     dropout = layers.Dropout(0.2)(lstm)
     lstm = layers.LSTM(FLAGS.num_cells)(dropout)
-    notes = layers.Softmax(name='notes')(layers.Dense(256)(lstm))
-    velocity = layers.Softmax(name='velocity')(layers.Dense(len(VELOCITY))(lstm))
-    time = layers.Softmax(name='time')(layers.Dense(101)(lstm))
+    dropout = layers.Dropout(0.2)(lstm)
+    notes = layers.Softmax(name='notes')(layers.Dense(256)(dropout))
+    velocity = layers.Softmax(name='velocity')(layers.Dense(len(VELOCITY))(dropout))
+    time = layers.Softmax(name='time')(layers.Dense(101)(dropout))
 
     model = tf.keras.Model(inputs=inputs, outputs=[notes, velocity, time])
 
@@ -227,8 +228,8 @@ def main():
 
         init = merge_init(init, init_2)
         """
-
-        init = test_sequence[:FLAGS.interval]
+        start_index = random.randrange(0, len(test_sequence)-FLAGS.interval)
+        init = test_sequence[start_index:start_index+FLAGS.interval]
 
         generated_seq = []
         for i in range(FLAGS.num_generate_events):
