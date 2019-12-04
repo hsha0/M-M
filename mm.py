@@ -194,8 +194,9 @@ def main():
     else:
         model = create_lstm_model()
 
-    opt = optimizers.SGD(lr=FLAGS.learning_rate, decay=1e-6)
-    model.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+    lossWeights = {'notes': 1.0, 'velocity': 0.1, 'time': 0.2}
+    opt = optimizers.SGD(lr=FLAGS.learning_rate)
+    model.compile(loss='sparse_categorical_crossentropy', loss_weights=lossWeights, optimizer=opt, metrics=['accuracy'])
 
     if FLAGS.num_epochs < FLAGS.epoch_interval:
         FLAGS.epoch_interval = FLAGS.num_epochs
