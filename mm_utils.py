@@ -7,7 +7,13 @@ import sys
 VELOCITY = [8, 20, 31, 42, 53, 64, 80, 96, 112, 127]
 SEQUENCE_LENGTH = 128+128+len(VELOCITY)+101
 
+
 def convert_files_to_eventSequence(data_path):
+    """
+    Convert MIDI files to event sequence
+    :param data_path: string. data dir path.
+    :return: list. a list of event sequence
+    """
     pre = os.getcwd()
     os.chdir(data_path)
     midi_files = glob.glob('*.MID')[:2]
@@ -27,11 +33,21 @@ def convert_files_to_eventSequence(data_path):
 
 
 def velocity_index(true_velocity):
+    """
+    find the index of the nearest velocity in VELOCITY list.
+    :param true_velocity: int. Actual velocity in message.
+    :return: int. Index.
+    """
     diff = [abs(VELOCITY[i] - int(true_velocity)) for i in range(len(VELOCITY))]
     return diff.index(min(diff))
 
 
 def preprocess_msg(msg):
+    """
+    Convert each note on/off message to 3-element list.
+    :param msg: object. MIDI message.
+    :return: list. A 3-element list.
+    """
     if msg.type == 'note_on':
         return [msg.note, 256+velocity_index(msg.velocity), msg.time]
     elif msg.type == 'note_off':
@@ -41,11 +57,21 @@ def preprocess_msg(msg):
 
 
 def add_time(msgs):
+    """
+    Sum vectors on axis 0.
+    :param msgs: list. A list of encoded MIDI messages.
+    :return: list. Sum of all MIDI messages.
+    """
     msgs = np.array(msgs)
     return np.sum(msgs, axis=0)
 
 
 def msg_to_event(msg):
+    """
+    Update time.
+    :param msg: list. A 3-element list.
+    :return: list. A 3-element list.
+    """
     note_event = int(msg[0])
     velocity_event = int(msg[1])
     time_event = int(round(msg[2], 2) * 100 + 256 + len(VELOCITY))
@@ -55,6 +81,11 @@ def msg_to_event(msg):
 
 
 def convert_midi_to_eventSequence(midi):
+    """
+    Convert single MIDI file to event sequence.
+    :param midi:
+    :return:
+    """
     mid = mido.MidiFile(midi)
 
     msgs = [msg for msg in mid if msg.type in ['note_on', 'note_off', 'control_change']]
@@ -73,7 +104,11 @@ def convert_midi_to_eventSequence(midi):
 
 
 def single_event_to_msg(event):
-
+    """
+    Convert single event to message.
+    :param event: A 3-element list
+    :return: Object. MIDI message.
+    """
     if event[1] >= 256: event[1] -= 256
 
     if event[2] >= 256+len(VELOCITY): event[2] -= 256+len(VELOCITY)
@@ -93,6 +128,12 @@ def single_event_to_msg(event):
 
 
 def convert_eventSequence_to_midi(seq, epochs):
+    """
+    Convert event sequence to a MIDI file.
+    :param seq: list. A list of 3-element lists.
+    :param epochs: Int. Number of epochs.
+    :return: None.
+    """
     msgs = list(map(single_event_to_msg, seq))
 
     index = 0
