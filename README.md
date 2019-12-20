@@ -1,6 +1,34 @@
 # CSCI 374 Final Project: Machine and Music (M&M)
 Yuanzhe Liu, Kumo (Yiyun) Shao, Han Shao
 
-## Introduction:
+This code implements multi-layer Recurrent Neural Network for training music generation
+models. In other words the model takes MIDI files as input and trains a Recurrent Neural Network that
+learns to predict the next message following the previous message sequence.
 
-Nowadays, art and technology have become more intertwined than ever before. More and more artists have started to use technology to create artworks, and new tools have been invented to provide artists with more possibilities while making arts. Neural network is one of these tools. It has been used to improve people's everyday lives on multiple areas such as nature language processing, image classification, and data mining, etc. The idea of using machine learning for arts came from the combination of art and technology. Comparing with other art forms, music obtains its distinctive characteristics since it is only perceptible only by hearing and feeling. At a live concert, the music performed by artists functions as a bridge between the performers and the audience. Through this bridge, the audience receive ideas and emotions from both the composers and performers of the music. Hence, it raises a problem to us: is it possible for a machine to create some music that can rouse human emotions and passions? To figure out the answer, we came up with this project making a tool to create music spontaneously through recurrent neural networks.
+## Requirements
+This code is written in Python and requires Tensorflow 1.15 and Mido libraries. You can
+install Tensorflow 1.15 and Mido through
+
+```bash
+$ pip3 install tensorflow==1.15
+$ pip3 install mido
+```
+
+## Usage
+### Data 
+All input MIDI files should be stored in an input directory. You'll notice that
+there is an example dataset included in the repo (`dataset`) which consisted of 15 songs from performer
+Jean-Selim Abdelmoula. 
+
+### Training
+Start training the model and generating music using `mm.py`. 
+
+```bash
+$ python3 mm.py --data_dir=DATA_DIR
+```
+
+Music generated after each 10 epochs will be stored in `results/DATA_DIR`.
+
+**Checkpoints.** While the model is training, it will periodically save models to folder
+`resuls/DATA_DIR/model` for each 10 epochs.
+
